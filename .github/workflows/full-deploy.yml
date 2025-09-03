@@ -29,11 +29,11 @@ jobs:
           ref: main
           persist-credentials: false  # 关闭默认凭证，后续用自定义 Token
           # 启用稀疏检出
-          sparse-checkout: |
-            .github/workflows/  # 仅拉取工作流目录，末尾斜杠表示“目录”
+          # sparse-checkout: |
+            # .github/workflows/  # 仅拉取工作流目录，末尾斜杠表示“目录”
           # 强制浅层克隆（仅拉取最新 commit，加快速度）
-          fetch-depth: 1
-          submodules: false
+          # fetch-depth: 1
+          # submodules: false
 
       # 步骤 2：初始化 Hexo 项目（若仓库 A 为空，首次执行会创建完整 Hexo 结构）
       - name: Initialize Hexo Project (If Not Exists)
