@@ -26,7 +26,7 @@ jobs:
             mkdir temp-hexo && cd temp-hexo  # 创建临时空目录并进入
             hexo init .  # 在空临时目录执行初始化（避开非空问题）
             # 将临时目录的 Hexo 文件全部移动到仓库 A 根目录
-            mv ./* ../ && mv ./.gitignore ../ && mv ./.npmignore ../
+            mv ./* ../ && mv ./.gitignore ../
             cd .. && rm -rf temp-hexo  # 回到根目录并删除临时目录
             npm install  # 安装 Hexo 依赖
           fi
