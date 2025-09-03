@@ -20,11 +20,15 @@ jobs:
       # 步骤 2：初始化 Hexo 项目（若仓库 A 为空，首次执行会创建完整 Hexo 结构）
       - name: Initialize Hexo Project (If Not Exists)
         run: |
-          # 检查是否已初始化 Hexo（通过是否有 _config.yml 判断）
+          # 检查是否已初始化 Hexo（通过根目录是否有 _config.yml 判断）
           if [ ! -f "_config.yml" ]; then
             npm install -g hexo-cli  # 全局安装 Hexo 脚手架
-            hexo init .              # 在当前目录（仓库 A 根目录）初始化 Hexo
-            npm install              # 安装 Hexo 依赖
+            mkdir temp-hexo && cd temp-hexo  # 创建临时空目录并进入
+            hexo init .  # 在空临时目录执行初始化（避开非空问题）
+            # 将临时目录的 Hexo 文件全部移动到仓库 A 根目录
+            mv ./* ../ && mv ./.gitignore ../ && mv ./.npmignore ../
+            cd .. && rm -rf temp-hexo  # 回到根目录并删除临时目录
+            npm install  # 安装 Hexo 依赖
           fi
 
       # 步骤 3：安装 Anzhiyu 主题（若未安装则克隆，已安装则更新）
