@@ -10,6 +10,18 @@ jobs:
   full-setup-and-deploy:
     runs-on: ubuntu-latest  # 运行环境：Ubuntu 服务器
     steps:
+      # 新增步骤：清空仓库 A 除 .github/workflows 外的所有文件/文件夹
+      - name: Clean Up Non-Workflow Files
+        run: |
+          # 1. 列出当前目录所有内容（排除 .github/workflows），确认要删除的目标
+          echo "Files to delete:"
+          find . -maxdepth 1 ! -name '.' ! -name '.github' ! -name '.git' -print0 | xargs -0 ls -d
+          # 2. 强制删除所有非目标内容（-maxdepth 1 限制仅删除根目录文件/文件夹）
+          find . -maxdepth 1 ! -name '.' ! -name '.github' ! -name '.git' -print0 | xargs -0 rm -rf
+          # 3. （可选）验证删除结果
+          echo -e "\nRemaining files after cleanup:"
+          ls -la
+
       # 步骤 1：拉取仓库 A 的代码（初始为空，首次执行后会写入 Hexo 源码）
       - name: Checkout Source Repo (A)
         uses: actions/checkout@v4
