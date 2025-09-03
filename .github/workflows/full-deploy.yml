@@ -58,9 +58,6 @@ jobs:
         run: |
           # 用 sed 命令直接修改 _config.yml，将主题改为 anzhiyu（覆盖默认的 landscape）
           sed -i 's/^theme: .*/theme: anzhiyu/' _config.yml
-          # 可选：添加博客标题、作者（根据需要修改下面的值）
-          sed -i 's/^title: .*/title: My Hexo Blog/' _config.yml
-          sed -i 's/^author: .*/author: newstartsw/' _config.yml
 
       # 步骤 5：安装 Hexo 依赖（确保依赖最新，尤其是主题新增依赖）
       - name: Install Dependencies
