@@ -31,28 +31,28 @@
     tips: 生涯
     title: 无限进步
     list:
-      - desc: EDU,
+      - desc: EDU
         color: "#357ef5"
-      - desc: EDU,
+      - desc: ED
         color: "#357ef5"
-      - desc: EDU,
+      - desc: E
         color: "#357ef5"
     img: https://bu.dusays.com/2023/04/21/644287166329b.png
   statistic:
     link: /archives
     text: 文章隧道
-    cover: 
+    cover: https://fuck.this
   map:
     title: 我现在住在
     StrengthenTitle: 中国，赣州市
-    background: 
-    backgroundDark: 
+    background: https://fuck.this
+    backgroundDark: https://fuck.this
   selfInfo:
     selfInfoTips1: 生于
     selfInfoContentYear: 2000
-    selfInfoTips2: 
-    selfInfoContent2: 
-    selfInfoTips3: 
+    selfInfoTips2: #
+    selfInfoContent2: ##
+    selfInfoTips3: ###
     selfInfoContent3: 大三学生👨‍🎓
   personalities:
     author_name: 执政官
@@ -72,7 +72,7 @@
     game_tips: 爱好游戏
     game_title: CSGO
     game_uid: "青桔"
-    game_bg: 
+    game_bg: https://fuck.this
   comic:
     comic_tips: 爱好美照
     comic_title: 自然
@@ -95,12 +95,12 @@
   like:
     like_tips: 关注偏好
     like_title: 数码科技
-    like_bg: 
+    like_bg: https://fuck.this
     like_bottom: 手机、电脑软硬件
   music:
     music_tips: 音乐偏好
     music_title: 薛之谦
-    music_bg: 
+    music_bg: https://fuck.this
     music_link: /music
   reward_list:
     - name: 91
