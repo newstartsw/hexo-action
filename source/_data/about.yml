@@ -77,20 +77,15 @@
     comic_tips: 爱好美照
     comic_title: 自然
     comic_list:
-      - name: 
-        href: 
+      - name: 1
         cover: https://imghubc.pages.dev/file/tg/D1zFtnd4.jpg
-      - name: 
-        href: 
+      - name: 2
         cover: https://imghubc.pages.dev/file/tg/pq2TfXwb.jpg
-      - name: 
-        href: 
+      - name: 3
         cover:https://imghubc.pages.dev/file/tg/qQLxP3iw.jpg
-      - name: 
-        href:
+      - name: 4
         cover: https://imghubc.pages.dev/file/tg/re7V00lz.jpg
-      - name: 
-        href: 
+      - name: 5
         cover: https://imghubc.pages.dev/file/tg/FPs8L5Fk.jpg
   like:
     like_tips: 关注偏好
