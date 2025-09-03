@@ -71,7 +71,7 @@ jobs:
       - name: Deploy to GitHub Pages (Repo B)
         uses: peaceiris/actions-gh-pages@v4
         with:
-          deploy_key: ${{ secrets.HEXO_DEPLOY_TOKEN }}  # 调用仓库 A 配置的 Token
+          personal_token: ${{ secrets.HEXO_DEPLOY_TOKEN }}  # 调用仓库 A 配置的 Token
           external_repository: newstartsw/newstartsw.github.io  # 替换为仓库 B 地址（例：zhangsan/zhangsan.github.io）
           publish_branch: main  # 仓库 B 用于承载静态文件的分支（默认 main）
           publish_dir: ./public  # Hexo 构建后的静态文件目录
