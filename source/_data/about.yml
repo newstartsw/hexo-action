@@ -37,16 +37,16 @@
         color: "#357ef5"
       - desc: E
         color: "#357ef5"
-    img: https://bu.dusays.com/2023/04/21/644287166329b.png
+    img: https://imghubc.pages.dev/file/tg/GVpIwSGa.jpg
   statistic:
     link: /archives
     text: 文章隧道
-    cover: https://fuck.this
+    cover: https://imghubc.pages.dev/file/tg/GVpIwSGa.jpg
   map:
     title: 我现在住在
     StrengthenTitle: 中国，赣州市
-    background: https://fuck.this
-    backgroundDark: https://fuck.this
+    background: https://imghubc.pages.dev/file/tg/eqTKgVUZ.jpg
+    backgroundDark: https://imghubc.pages.dev/file/tg/qMPRN5I2.jpg
   selfInfo:
     selfInfoTips1: 生于
     selfInfoContentYear: 2000
@@ -72,7 +72,7 @@
     game_tips: 爱好游戏
     game_title: CSGO
     game_uid: "青桔"
-    game_bg: https://fuck.this
+    game_bg: https://imghubc.pages.dev/file/tg/eqTKgVUZ.jpg
   comic:
     comic_tips: 爱好美照
     comic_title: 自然
@@ -95,12 +95,12 @@
   like:
     like_tips: 关注偏好
     like_title: 数码科技
-    like_bg: https://fuck.this
+    like_bg: https://imghubc.pages.dev/file/tg/eqTKgVUZ.jpg
     like_bottom: 手机、电脑软硬件
   music:
     music_tips: 音乐偏好
     music_title: 薛之谦
-    music_bg: https://fuck.this
+    music_bg: https://imghubc.pages.dev/file/tg/oRQAHfHv.jpg
     music_link: /music
   reward_list:
     - name: 91
