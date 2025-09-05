@@ -31,6 +31,13 @@
       siteshot: https://npm.elemecdn.com/akilar-friends@latest/siteshot/akilar.top.jpg
       color: vip
       tag: 技术
+    - name: 张洪Heo
+      link: https://blog.zhheo.com
+      avatar: https://img.zhheo.com/i/67d8fa75943e4.webp
+      descr: 分享设计与科技生活
+      siteshot: https://img.zhheo.com/i/67d8fb3c51399.webp
+      color: vip
+      tag: 技术
 
 - class_name: 小伙伴
   flink_style: anzhiyu
