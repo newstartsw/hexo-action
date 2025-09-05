@@ -30,10 +30,10 @@
   hundredSuffix: 
   class_desc: 那些人，那些事
   link_list:
-    - name: 安知鱼
-      link: https://blog.anheyu.com/
-      avatar: https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg
-      descr: 生活明朗，万物可爱
+    - name: 🆕 starts
+      link: https://blog.nssw.qzz.io
+      avatar: https://blog.nssw.qzz.io/img/logo.png
+      descr: 新的开始
       recommend: true
     - name: new starts
       link: https://blog.nssw.qzz.io
