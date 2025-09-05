@@ -41,7 +41,7 @@
   hundredSuffix: 
   class_desc: 测试用
   link_list:
-    - name: 测试站
-      link: https://test.com
+    - name: 测试站2
+      link: https://test2.com
       avatar: https://picsum.photos/200/200
-      descr: 测试站点
+      descr: 测试站点2
