@@ -24,6 +24,13 @@
       siteshot: https://npm.elemecdn.com/anzhiyu-theme-static@1.1.6/img/blog.anheyu.com.jpg
       color: vip
       tag: 技术
+    - name: Akilarの糖果屋
+      link: https://akilar.top
+      avatar: https://npm.elemecdn.com/akilar-friends@latest/avatar/akilar.top.jpg
+      descr: 欢迎光临糖果屋
+      siteshot: https://npm.elemecdn.com/akilar-friends@latest/siteshot/akilar.top.jpg
+      color: vip
+      tag: 技术
 
 - class_name: 小伙伴
   flink_style: anzhiyu
