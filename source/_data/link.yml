@@ -1,6 +1,7 @@
+# 友链数据（自动生成）
 - class_name: 框架
   flink_style: flexcard
-  hundredSuffix: ""
+  hundredSuffix: 
   link_list:
     - name: Hexo
       link: https://hexo.io/zh-tw/
@@ -14,7 +15,7 @@
 
 - class_name: 推荐博客
   flink_style: telescopic
-  hundredSuffix: ""
+  hundredSuffix: 
   link_list:
     - name: 安知鱼
       link: https://blog.anheyu.com/
@@ -25,12 +26,18 @@
       tag: 技术
 
 - class_name: 小伙伴
-  class_desc: 那些人，那些事
   flink_style: anzhiyu
-  hundredSuffix: ""
+  hundredSuffix: 
+  class_desc: 那些人，那些事
   link_list:
     - name: 安知鱼
       link: https://blog.anheyu.com/
       avatar: https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg
       descr: 生活明朗，万物可爱
       recommend: true
+
+- class_name: 测试分类
+  flink_style: flexcard
+  hundredSuffix: ""
+  class_desc: 测试用
+  link_list:
