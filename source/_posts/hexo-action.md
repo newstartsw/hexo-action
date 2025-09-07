@@ -42,80 +42,100 @@ cover:
 ```yaml    
 name: Hexo Full Auto Deploy  # 工作流名称：全自动化部署
 
-# 触发条件：1. 推送代码到仓库 A 的 main 分支；2. 支持手动触发（Action 页面点击「Run workflow」）
+# 触发条件：1. 推送代码到仓库 A 的 main 分支时执行；2. 可手动触发（方便测试）
 on:
   push:
     branches: [main]
-  workflow_dispatch:
+  workflow_dispatch:  # 手动触发开关（在 Action 页面点击「Run workflow」即可执行）
 
 jobs:
   full-setup-and-deploy:
     runs-on: ubuntu-latest  # 运行环境：Ubuntu 服务器
     steps:
-      # 步骤 1：拉取仓库 A 代码（初始为空，首次执行后写入 Hexo 源码）
+      # 步骤 1：拉取仓库 A 的代码（初始为空，首次执行后会写入 Hexo 源码）
       - name: Checkout Source Repo (A)
         uses: actions/checkout@v4
         with:
           ref: main
-          persist-credentials: false
+          persist-credentials: false  # 关闭默认凭证，后续用自定义 Token
 
-      # 步骤 2：初始化 Hexo 项目（仓库 A 为空时自动创建完整结构）
+      # 步骤 2：初始化 Hexo 项目（若仓库 A 为空，首次执行会创建完整 Hexo 结构）
       - name: Initialize Hexo Project (If Not Exists)
         run: |
+          # 检查是否已初始化 Hexo（通过根目录是否有 _config.yml 判断）
           if [ ! -f "_config.yml" ]; then
-            npm install -g hexo-cli
-            hexo init .
-            npm install
+            npm install -g hexo-cli  # 全局安装 Hexo 脚手架
+            mkdir temp-hexo && cd temp-hexo  # 创建临时空目录并进入
+            hexo init .  # 在空临时目录执行初始化（避开非空问题）
+            # 将临时目录的 Hexo 文件全部移动到仓库 A 根目录
+            mv ./* ../ && mv ./.gitignore ../
+            cd .. && rm -rf temp-hexo  # 回到根目录并删除临时目录
+            npm install  # 安装 Hexo 依赖
           fi
 
-      # 步骤 3：安装/更新 Anzhiyu 主题（不存在则克隆，存在则拉取最新版）
+      # 步骤 3：安装 Anzhiyu 主题（若未安装则克隆，已安装则更新）
       - name: Install/Update Anzhiyu Theme
         run: |
           THEME_DIR="themes/anzhiyu"
+          # 检查主题目录是否存在，不存在则克隆，存在则拉取最新版本
           if [ ! -d "$THEME_DIR" ]; then
             git clone https://github.com/anzhiyu-c/hexo-theme-anzhiyu.git "$THEME_DIR"
+            # 复制主题配置文件到根目录（方便后续修改）
             cp "$THEME_DIR/_config.yml" "_config.anzhiyu.yml"
           else
-            cd "$THEME_DIR" && git pull
+            cd "$THEME_DIR" && git pull  # 已安装则更新主题到最新版
           fi
 
-      # 步骤 4：配置 Hexo 主设置（启用 Anzhiyu 主题，可修改标题/作者）
+      # 新增步骤：清除主题目录的 Git 信息（关键，解决子模块报错）
+      - name: Remove Git Info from Theme Dir
+        run: |
+          THEME_DIR="themes/anzhiyu"
+          if [ -d "$THEME_DIR/.git" ]; then
+            rm -rf "$THEME_DIR/.git"  # 删除主题目录内的 Git 仓库文件，避免被识别为子模块
+            rm -f "$THEME_DIR/.gitignore" "$THEME_DIR/.gitattributes"  # 清理残留的 Git 配置文件
+          fi
+
+      # 步骤 4：配置 Hexo 主配置（启用 Anzhiyu 主题，避免手动改文件）
       - name: Configure Hexo Main Settings
         run: |
+          # 用 sed 命令直接修改 _config.yml，将主题改为 anzhiyu（覆盖默认的 landscape）
           sed -i 's/^theme: .*/theme: anzhiyu/' _config.yml
-          sed -i 's/^title: .*/title: My Hexo Blog/' _config.yml  # 可选：修改博客标题
-          sed -i 's/^author: .*/author: Your Name/' _config.yml   # 可选：修改作者名
 
-      # 步骤 5：安装依赖（含主题推荐依赖）
+      # 步骤 5：安装 Hexo 依赖（确保依赖最新，尤其是主题新增依赖）
       - name: Install Dependencies
         run: |
           npm install -g hexo-cli
           npm install
+          # 安装 Anzhiyu 主题推荐依赖（部分功能需要）
           npm install hexo-renderer-pug hexo-renderer-stylus --save
 
       # 步骤 6：构建 Hexo 静态文件（生成 public 目录）
       - name: Build Hexo Static Files
         run: |
-          hexo clean
-          hexo generate
+          hexo clean  # 清理缓存
+          hexo generate  # 构建静态文件到 public 目录
 
-      # 步骤 7：部署静态文件到仓库 B（GitHub Pages）
+      # 步骤 7：将 public 目录部署到仓库 B（GitHub Pages）
       - name: Deploy to GitHub Pages (Repo B)
         uses: peaceiris/actions-gh-pages@v4
         with:
-          deploy_key: ${{ secrets.HEXO_DEPLOY_TOKEN }}
-          external_repository: <你的用户名>/<你的用户名>.github.io  # 替换为仓库 B 地址（例：zhangsan/zhangsan.github.io）
-          publish_branch: main
-          publish_dir: ./public
+          personal_token: ${{ secrets.HEXO_DEPLOY_TOKEN }}  # 调用仓库 A 配置的 Token
+          external_repository: newstartsw/newstartsw.github.io  # 替换为仓库 B 地址（例：zhangsan/zhangsan.github.io）
+          publish_branch: main  # 仓库 B 用于承载静态文件的分支（默认 main）
+          publish_dir: ./public  # Hexo 构建后的静态文件目录
 
-      # 步骤 8：将 Hexo 源代码推回仓库 A 保存
+      # 步骤 8：（关键）将 Hexo 源代码（含主题、配置）推回仓库 A 保存
       - name: Push Hexo Source Back to Repo A
         run: |
-          git config --global user.name "Your GitHub Name"  # 替换为你的 GitHub 用户名
-          git config --global user.email "Your GitHub Email"  # 替换为你的 GitHub 绑定邮箱
+          # 配置 Git 身份（Action 环境需要）
+          git config --global user.name "newstartsw"  # 替换为你的 GitHub 用户名
+          git config --global user.email "newstartsw@outlook.com"  # 替换为你的 GitHub 绑定邮箱
+          # 添加所有修改（初始化的 Hexo 代码、主题文件等）
           git add .
+          # 提交信息（首次是初始化，后续是更新）
           git commit -m "Auto: Initialize Hexo + Anzhiyu theme / Update source" || echo "No changes to commit"
-          git push https://${{ secrets.HEXO_DEPLOY_TOKEN }}@github.com/<你的用户名>/<仓库 A 名称>.git main  # 替换为仓库 A 地址（例：zhangsan/hexo-anzhiyu-source）
+          # 用 Token 授权推送到仓库 A 的 main 分支
+          git push https://${{ secrets.HEXO_DEPLOY_TOKEN }}@github.com/newstartsw/hexo-action.git main  # 替换为仓库 A 地址（例：zhangsan/hexo-anzhiyu-source）
 ```
  
 ## 三、触发工作流并验证
