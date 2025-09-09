@@ -607,7 +607,7 @@ site_verification:
   - name: baidu-site-verification
     content: code-xxx
   - name: msvalidate.01
-    content: xxx
+    content: 120012079F0F6106D0CA1C06E2DB06C4
 
 # Beautify/Effect (美化/效果)
 # --------------------------------------
