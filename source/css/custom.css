@@ -1,3 +1,4 @@
+/* 背景图 */
 #web_bg {
     background-size: 20rem;
     background-image: url(https://imghubc.pages.dev/file/tg/XFPn1x96.svg)!important;
@@ -7,4 +8,21 @@
 [data-theme=dark] #web_bg {
     background-size: 100rem;
     background-image: url(https://imghubc.pages.dev/file/tg/V3Eo65Bg.jpg)!important
+}
+
+/* 侧边栏头像卡片 */
+#aside-content>.card-widget.card-info::before {
+  background: url('https://imghubc.pages.dev/file/tg/2WEmHzWO.gif');
+  border: 0;
+  position: absolute;
+  background-size: 100% 100%;
+  -webkit-animation: Gradient 10s ease infinite;
+  -moz-animation: Gradient 10s ease infinite;
+  animation: Gradient 10s ease infinite !important;
+}
+/* 调整文字颜色与层级关系 */
+.card-info {
+  color: #fff;
+  position: relative;
+  z-index: 2;
 }
