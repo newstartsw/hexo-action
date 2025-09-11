@@ -7,6 +7,7 @@ tags:
   - workers
 categories:
   - 后端
+description: "tgbot-workers-github自动化友链机器人"
 ---
 
 # 🌐 10分钟搭建 友链机器人
