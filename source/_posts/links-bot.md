@@ -48,6 +48,502 @@ Cloudflare Worker 是免费的轻量运行环境，用来承载机器人代码�
 ### 3. 粘贴机器人代码
 1. 回到顶部 **代码** 标签页，删除默认的示例代码。
 2. 复制下方的完整机器人代码，粘贴到代码编辑器中。
+```js
+// 主函数中获取环境变量，避免全局依赖
+export default {
+  async fetch(request, env) {
+    // 从环境变量初始化配置
+    const CONFIG = {
+      TGBOT_TOKEN: env.TGBOT_TOKEN,
+      ADMIN_CHAT_ID: env.ADMIN_CHAT_ID,
+      GITHUB_REPO: "newstartsw/hexo-action",
+      GITHUB_FILE_PATH: "source/_data/link.yml",
+      GITHUB_BRANCH: "main",
+      GITHUB_TOKEN: env.GITHUB_TOKEN
+    };
+
+    // 验证环境变量是否配置完整
+    function checkEnvConfig() {
+      const requiredVars = ['TGBOT_TOKEN', 'ADMIN_CHAT_ID', 'GITHUB_TOKEN'];
+      const missing = requiredVars.filter(varName => !CONFIG[varName]);
+      
+      if (missing.length > 0) {
+        console.error(`缺少环境变量：${missing.join(', ')}`);
+        return false;
+      }
+      return true;
+    }
+
+    // 发送Telegram消息
+    async function sendTgMessage(chatId, text) {
+      const tgApiUrl = `https://api.telegram.org/bot${CONFIG.TGBOT_TOKEN}/sendMessage`;
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        
+        const response = await fetch(tgApiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: text,
+            disable_web_page_preview: true
+          }),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        return response.ok;
+      } catch (error) {
+        console.error("发送消息失败:", error);
+        return false;
+      }
+    }
+
+    // 验证管理员权限
+    function isAdmin(chatId) {
+      return String(chatId) === String(CONFIG.ADMIN_CHAT_ID);
+    }
+
+    // 解析YAML
+    function parseYaml(yamlText) {
+      try {
+        const cleanYaml = yamlText
+          .replace(/^\uFEFF/, '')
+          .replace(/\r\n/g, '\n')
+          .replace(/\t/g, '  ')
+          .split('\n')
+          .filter(line => line.trim() !== '');
+
+        const categories = [];
+        let currentCategory = null;
+        let currentLink = null;
+        let inLinkList = false;
+
+        for (const line of cleanYaml) {
+          const trimmedLine = line.trim();
+          if (trimmedLine.startsWith('#')) continue;
+
+          const indent = line.length - line.trimStart().length;
+
+          if (indent === 0 && trimmedLine.startsWith('- ')) {
+            if (currentCategory) {
+              if (currentLink) currentCategory.link_list.push(currentLink);
+              categories.push(currentCategory);
+            }
+            currentCategory = { link_list: [] };
+            inLinkList = false;
+            currentLink = null;
+
+            const classMatch = trimmedLine.match(/class_name:\s*["']?([^"']+)["']?/);
+            if (classMatch) currentCategory.class_name = classMatch[1];
+            continue;
+          }
+
+          if (currentCategory && indent === 2 && !inLinkList) {
+            const [key, ...valueParts] = trimmedLine.split(':')
+              .map(item => item.trim().replace(/["']/g, ''));
+            const value = valueParts.join(':').trim();
+            
+            if (key === 'link_list') {
+              inLinkList = true;
+            } else if (key && value !== undefined) {
+              currentCategory[key] = value;
+            }
+            continue;
+          }
+
+          if (currentCategory && inLinkList && indent === 4 && trimmedLine.startsWith('- ')) {
+            if (currentLink) {
+              currentCategory.link_list.push(currentLink);
+            }
+            currentLink = {};
+            const nameMatch = trimmedLine.match(/name:\s*["']?([^"']+)["']?/);
+            if (nameMatch) currentLink.name = nameMatch[1];
+            continue;
+          }
+
+          if (currentCategory && inLinkList && currentLink && indent === 6) {
+            const [key, ...valueParts] = trimmedLine.split(':')
+              .map(item => item.trim().replace(/["']/g, ''));
+            const value = valueParts.join(':').trim();
+            if (key && value !== undefined) {
+              currentLink[key] = value;
+            }
+            continue;
+          }
+        }
+
+        if (currentLink && currentCategory) {
+          currentCategory.link_list.push(currentLink);
+        }
+        if (currentCategory) {
+          categories.push(currentCategory);
+        }
+
+        return categories;
+      } catch (error) {
+        console.error("YAML解析错误:", error);
+        return null;
+      }
+    }
+
+    // 转换为YAML
+    function categoriesToYaml(categories) {
+      let yaml = "# 友链数据（自动生成）\n";
+      
+      categories.forEach((category, catIndex) => {
+        yaml += `- class_name: ${category.class_name || `分类${catIndex + 1}`}\n`;
+        
+        const categoryKeys = ['flink_style', 'hundredSuffix', 'class_desc'];
+        categoryKeys.forEach(key => {
+          if (category[key] !== undefined) {
+            yaml += `  ${key}: ${category[key]}\n`;
+          }
+        });
+        
+        yaml += `  link_list:\n`;
+        category.link_list.forEach(link => {
+          yaml += `    - name: ${link.name || ''}\n`;
+          
+          const linkKeys = ['link', 'avatar', 'descr', 'siteshot', 'color', 'tag', 'recommend'];
+          linkKeys.forEach(key => {
+            if (link[key] !== undefined) {
+              yaml += `      ${key}: ${link[key]}\n`;
+            }
+          });
+        });
+        
+        if (catIndex < categories.length - 1) {
+          yaml += "\n";
+        }
+      });
+      
+      return yaml;
+    }
+
+    // 获取GitHub文件
+    async function getGitHubFile() {
+      if (!checkEnvConfig()) {
+        return { error: "环境变量配置不完整" };
+      }
+      
+      try {
+        const metaUrl = `https://api.github.com/repos/${CONFIG.GITHUB_REPO}/contents/${CONFIG.GITHUB_FILE_PATH}?ref=${CONFIG.GITHUB_BRANCH}`;
+        
+        const metaResponse = await fetch(metaUrl, {
+          headers: {
+            "Authorization": `token ${CONFIG.GITHUB_TOKEN}`,
+            "User-Agent": "FriendLinkBot"
+          },
+          timeout: 10000
+        });
+        
+        if (!metaResponse.ok) {
+          const error = await metaResponse.text().catch(() => `状态码: ${metaResponse.status}`);
+          return { error: `获取元数据失败: ${error}` };
+        }
+        
+        const metaData = await metaResponse.json();
+        const fileSha = metaData.sha;
+        
+        const contentResponse = await fetch(metaUrl, {
+          headers: {
+            "Authorization": `token ${CONFIG.GITHUB_TOKEN}`,
+            "User-Agent": "FriendLinkBot",
+            "Accept": "application/vnd.github.v3.raw"
+          },
+          timeout: 10000
+        });
+        
+        if (!contentResponse.ok) {
+          const error = await contentResponse.text().catch(() => `状态码: ${contentResponse.status}`);
+          return { error: `获取内容失败: ${error}` };
+        }
+        
+        return {
+          content: await contentResponse.text(),
+          sha: fileSha,
+          error: null
+        };
+      } catch (err) {
+        return { error: `获取文件错误: ${err.message}` };
+      }
+    }
+
+    // 更新GitHub文件
+    async function updateGitHubFile(content, sha, message) {
+      if (!checkEnvConfig()) {
+        return false;
+      }
+      
+      try {
+        if (!sha) {
+          console.error("更新失败：SHA值为空");
+          return false;
+        }
+        
+        const url = `https://api.github.com/repos/${CONFIG.GITHUB_REPO}/contents/${CONFIG.GITHUB_FILE_PATH}`;
+        const encodedContent = btoa(unescape(encodeURIComponent(content)));
+        
+        const response = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Authorization": `token ${CONFIG.GITHUB_TOKEN}`,
+            "Content-Type": "application/json",
+            "User-Agent": "FriendLinkBot"
+          },
+          body: JSON.stringify({
+            message: message,
+            content: encodedContent,
+            sha: sha,
+            branch: CONFIG.GITHUB_BRANCH
+          }),
+          timeout: 15000
+        });
+        
+        const responseText = await response.text().catch(() => "无响应内容");
+        console.log(`更新响应状态: ${response.status}, 内容: ${responseText}`);
+        
+        if (!response.ok) return false;
+        return true;
+      } catch (error) {
+        console.error("更新文件异常:", error);
+        return false;
+      }
+    }
+
+    // 命令处理
+    async function handleCommand(command, chatId) {
+      const [action, ...paramsParts] = command.trim().split(' ') || [];
+      const params = paramsParts.join(' ');
+      
+      if (!checkEnvConfig()) {
+        return "❌ 机器人配置不完整，请检查环境变量";
+      }
+      
+      // 帮助命令
+      if (!action || action === '帮助' || action === 'help') {
+        return `📝 友链机器人命令：
+1. 查询 → /友链 查询
+2. 添加分类 → /友链 添加分类 名称|样式|后缀|描述
+3. 添加友链 → /友链 添加友链 分类序号|名称|link|avatar|descr|siteshot|color|tag|recommend
+4. 修改友链 → /友链 修改友链 分类序号|友链序号|...（同添加格式）
+5. 删除友链 → /友链 删除友链 分类序号|友链序号
+6. 删除分类 → /友链 删除分类 分类序号`;
+      }
+      
+      // 获取友链数据
+      const fileData = await getGitHubFile();
+      if (!fileData || fileData.error) {
+        const errorMsg = fileData?.error || "未知错误";
+        return `❌ 无法获取友链数据：${errorMsg}`;
+      }
+      
+      // 解析YAML
+      const categories = parseYaml(fileData.content);
+      if (!categories) {
+        return "❌ 解析友链数据失败";
+      }
+      
+      // 查询命令
+      if (action === '查询') {
+        let result = "📋 友链列表（完整参数）：\n";
+        categories.forEach((cat, catIdx) => {
+          result += `\n${catIdx + 1}. 分类：${cat.class_name}\n`;
+          result += `   样式：${cat.flink_style || '默认'}\n`;
+          result += `   友链数量：${cat.link_list.length}\n`;
+          
+          if (cat.link_list.length > 0) {
+            result += "   友链：\n";
+            cat.link_list.forEach((link, linkIdx) => {
+              result += `   ${linkIdx + 1}. ${link.name}\n`;
+              result += `      链接：${link.link}\n`;
+              result += `      头像：${link.avatar}\n`;
+              result += `      描述：${link.descr || '无'}\n`;
+              if (link.siteshot) result += `      截图：${link.siteshot}\n`;
+              if (link.color) result += `      颜色：${link.color}\n`;
+              if (link.tag) result += `      标签：${link.tag}\n`;
+              if (link.recommend) result += `      推荐：${link.recommend}\n`;
+            });
+          }
+        });
+        return result;
+      }
+      
+      // 管理员验证
+      if (!isAdmin(chatId)) {
+        return "❌ 权限不足，仅管理员可执行增删改";
+      }
+      
+      // 添加分类
+      if (action === '添加分类') {
+        const [name, flink_style, hundredSuffix = "", class_desc = ""] = params.split('|');
+        if (!name || !flink_style) {
+          return "❌ 格式错误！需要：名称|flink_style";
+        }
+        
+        if (categories.some(cat => cat.class_name === name)) {
+          return "❌ 分类已存在";
+        }
+        
+        categories.push({
+          class_name: name,
+          flink_style: flink_style,
+          hundredSuffix: hundredSuffix,
+          class_desc: class_desc,
+          link_list: []
+        });
+        
+        const yaml = categoriesToYaml(categories);
+        const success = await updateGitHubFile(yaml, fileData.sha, `添加分类: ${name}`);
+        return success ? `✅ 添加分类成功：${name}` : "❌ 添加分类失败";
+      }
+      
+      // 添加友链
+      if (action === '添加友链') {
+        const [
+          catIdxStr, name, link, avatar, descr = "", 
+          siteshot = "", color = "", tag = "", recommend = ""
+        ] = params.split('|');
+        const catIdx = parseInt(catIdxStr) - 1;
+        
+        if (isNaN(catIdx) || catIdx < 0 || catIdx >= categories.length) {
+          return "❌ 分类序号错误";
+        }
+        if (!name || !link || !avatar) {
+          return "❌ 格式错误！至少需要：分类序号|名称|link|avatar";
+        }
+        
+        const newLink = { name, link, avatar };
+        if (descr) newLink.descr = descr;
+        if (siteshot) newLink.siteshot = siteshot;
+        if (color) newLink.color = color;
+        if (tag) newLink.tag = tag;
+        if (recommend) newLink.recommend = recommend;
+        
+        categories[catIdx].link_list.push(newLink);
+        
+        const yaml = categoriesToYaml(categories);
+        const success = await updateGitHubFile(yaml, fileData.sha, `添加友链: ${name}`);
+        return success ? `✅ 成功添加友链到【${categories[catIdx].class_name}】` : "❌ 添加友链失败";
+      }
+      
+      // 修改友链
+      if (action === '修改友链') {
+        const [
+          catIdxStr, linkIdxStr, name, link, avatar, descr = "", 
+          siteshot = "", color = "", tag = "", recommend = ""
+        ] = params.split('|');
+        const catIdx = parseInt(catIdxStr) - 1;
+        const linkIdx = parseInt(linkIdxStr) - 1;
+        
+        if (isNaN(catIdx) || catIdx < 0 || catIdx >= categories.length) return "❌ 分类序号错误";
+        const category = categories[catIdx];
+        if (isNaN(linkIdx) || linkIdx < 0 || linkIdx >= category.link_list.length) return "❌ 友链序号错误";
+        
+        const updatedLink = { name, link, avatar };
+        if (descr) updatedLink.descr = descr;
+        if (siteshot) updatedLink.siteshot = siteshot;
+        if (color) updatedLink.color = color;
+        if (tag) updatedLink.tag = tag;
+        if (recommend) updatedLink.recommend = recommend;
+        
+        category.link_list[linkIdx] = updatedLink;
+        
+        const yaml = categoriesToYaml(categories);
+        const success = await updateGitHubFile(yaml, fileData.sha, `修改友链: ${name}`);
+        return success ? `✅ 修改友链成功` : "❌ 修改友链失败";
+      }
+      
+      // 删除友链
+      if (action === '删除友链') {
+        const [catIdxStr, linkIdxStr] = params.split('|');
+        const catIdx = parseInt(catIdxStr) - 1;
+        const linkIdx = parseInt(linkIdxStr) - 1;
+        
+        if (isNaN(catIdx) || catIdx < 0 || catIdx >= categories.length) return "❌ 分类序号错误";
+        const category = categories[catIdx];
+        if (isNaN(linkIdx) || linkIdx < 0 || linkIdx >= category.link_list.length) return "❌ 友链序号错误";
+        
+        const deletedLink = category.link_list.splice(linkIdx, 1)[0];
+        
+        const yaml = categoriesToYaml(categories);
+        const success = await updateGitHubFile(yaml, fileData.sha, `删除友链: ${deletedLink.name}`);
+        return success ? `✅ 删除友链成功：${deletedLink.name}` : "❌ 删除友链失败";
+      }
+      
+      // 删除分类
+      if (action === '删除分类') {
+        const catIdx = parseInt(params) - 1;
+        if (isNaN(catIdx) || catIdx < 0 || catIdx >= categories.length) return "❌ 分类序号错误";
+        
+        const deletedCat = categories.splice(catIdx, 1)[0];
+        
+        const yaml = categoriesToYaml(categories);
+        const success = await updateGitHubFile(yaml, fileData.sha, `删除分类: ${deletedCat.class_name}`);
+        return success ? `✅ 删除分类成功：${deletedCat.class_name}` : "❌ 删除分类失败";
+      }
+      
+      return "❌ 未知命令，请发送 /友链 帮助";
+    }
+
+    // 处理请求路由
+    const url = new URL(request.url);
+    
+    // 设置Webhook
+    if (url.searchParams.has('setwebhook')) {
+      if (!checkEnvConfig()) {
+        return new Response("环境变量配置不完整", { status: 500 });
+      }
+      
+      const webhookUrl = `https://api.telegram.org/bot${CONFIG.TGBOT_TOKEN}/setWebhook?url=${encodeURIComponent(request.url.replace('?setwebhook', ''))}`;
+      const response = await fetch(webhookUrl);
+      return new Response(JSON.stringify(await response.json()), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // GET请求验证
+    if (request.method === "GET") {
+      return new Response("友链机器人运行中 ✅", { status: 200 });
+    }
+    
+    // 处理Telegram消息
+    if (request.method === "POST") {
+      try {
+        const tgData = await request.json();
+        if (!tgData?.message?.text) {
+          return new Response("OK", { status: 200 });
+        }
+        
+        const chatId = tgData.message.chat.id;
+        const userText = tgData.message.text.trim();
+        
+        let command = "";
+        if (userText.startsWith('/友链')) {
+          command = userText.substring(3).trim();
+        } else if (userText === '/help') {
+          command = '帮助';
+        }
+        
+        if (command) {
+          const reply = await handleCommand(command, chatId);
+          await sendTgMessage(chatId, reply);
+        }
+        
+        return new Response("OK", { status: 200 });
+      } catch (error) {
+        console.error("处理请求错误:", error);
+        return new Response("Error", { status: 500 });
+      }
+    }
+    
+    return new Response("不支持的方法", { status: 405 });
+  }
+};
+
+```
 3. 关键修改：找到代码中 `CONFIG` 部分，更新2个信息：
    - `GITHUB_REPO`：你的博客仓库路径（如 `newstartsw/hexo-action`，格式：`用户名/仓库名`）
    - `GITHUB_BRANCH`：仓库主分支（一般是 `main`，老仓库可能是 `master`，按自己 GitHub 仓库实际分支改）
