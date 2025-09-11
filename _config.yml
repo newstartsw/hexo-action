@@ -5,15 +5,15 @@
 # Site
 title: 🆕 Starts
 subtitle: '新的开始'
-description: ''
-keywords:
+description: '新'
+keywords: new starts
 author: newstartsw
 language: en
 timezone: ''
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: https://blog.nssw.qzz.io
+url: https://nssw.200536.xyz
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -116,5 +116,5 @@ feed:
   limit: 25
   content: false
   content_limit: 40
-  pretty_atom_file: /_data/atom.xsl
-  pretty_rss2_file: /_data/rss2.xsl
+  pretty_atom_file: /atom.xsl
+  pretty_rss2_file: /rss2.xsl
