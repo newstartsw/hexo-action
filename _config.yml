@@ -116,5 +116,5 @@ feed:
   limit: 25
   content: false
   content_limit: 40
-  pretty_atom_file: /source/_data/atom.xsl
-  pretty_rss2_file: /source/_data/rss2.xsl
+  pretty_atom_file: /_data/atom.xsl
+  pretty_rss2_file: /_data/rss2.xsl
