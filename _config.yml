@@ -107,10 +107,14 @@ deploy:
 # hexo-pretty-feed
 feed:
   enable: true
-  type: atom
-  path: atom.xml
+  type:
+    - atom
+    - rss2
+  path:
+    - atom.xml
+    - rss2.xml
   limit: 25
   content: false
   content_limit: 40
-  pretty_atom_file: /config/feed/atom.xsl
-  pretty_rss2_file: /config/feed/rss2.xsl
+  pretty_atom_file: /atom.xsl
+  pretty_rss2_file: /rss2.xsl
