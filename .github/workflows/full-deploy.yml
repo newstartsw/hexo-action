@@ -68,6 +68,9 @@ jobs:
           npm install hexo-renderer-pug hexo-renderer-stylus --save
           # 安装 hexo-pretty-feed Atom 1.0 或 RSS 2.0 Feed 插件
           npm install hexo-pretty-feed --save
+          # 安装安全页面跳转插件
+          npm install cheerio --save
+          npm install hexo-safego --save
 
       # 步骤 6：构建 Hexo 静态文件（生成 public 目录）
       - name: Build Hexo Static Files
