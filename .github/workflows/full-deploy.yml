@@ -64,8 +64,10 @@ jobs:
         run: |
           npm install -g hexo-cli
           npm install
-          # 安装 Anzhiyu 主题推荐依赖（部分功能需要）
+          # 安装 pug 和 stylus 渲染插件
           npm install hexo-renderer-pug hexo-renderer-stylus --save
+          # 安装 hexo-pretty-feed Atom 1.0 或 RSS 2.0 Feed 插件
+          npm install hexo-pretty-feed --save
 
       # 步骤 6：构建 Hexo 静态文件（生成 public 目录）
       - name: Build Hexo Static Files
