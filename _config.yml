@@ -102,3 +102,15 @@ theme: anzhiyu
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: ''
+
+# RSS订阅源
+# hexo-pretty-feed
+feed:
+  enable: true
+  type: atom
+  path: atom.xml
+  limit: 25
+  content: false
+  content_limit: 40
+  pretty_atom_file: /config/feed/atom.xsl
+  pretty_rss2_file: /config/feed/rss2.xsl
