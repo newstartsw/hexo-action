@@ -1288,7 +1288,7 @@ CDN:
     # pjax:
     # blueimp_md5:
     # valine:
-    # twikoo:
+     twikoo: https://cdn.cbd.int/newstartsw@1.0.0/twikoo.all.min.js
     # waline_js:
     # waline_css:
     # sharejs:
