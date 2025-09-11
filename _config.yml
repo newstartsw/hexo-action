@@ -154,7 +154,7 @@ hexo_safego:
     title: "nssw"            # 页面标题
     subtitle: "安全中心"         # 页面副标题
     darkmode: true              # 是否启用深色模式
-    countdowntime: -6           # 倒计时秒数
+    countdowntime: 6           # 倒计时秒数
   # 调试设置
   debug:
     enable: false               # 启用调试模式
