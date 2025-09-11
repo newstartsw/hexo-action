@@ -531,12 +531,10 @@ footer:
       enable: true
       link: /copyright
     linkList:
-      - link: https://github.com/anzhiyu-c/hexo-theme-anzhiyu
-        text: 主题
-      - link: <a title="无聊湾 🥱 The Boring Bay" href="https://boringbay.com"><img height="18px" src="https://boringbay.com/api/badge/nssw.200536.xyz"></img></a>
-        text: <a title="无聊湾 🥱 The Boring Bay" href="https://boringbay.com"><img height="18px" src="https://boringbay.com/api/badge/nssw.200536.xyz"></img></a>
-      # - link: https://image.anheyu.com
-      #   text: 图床
+       - link: https://github.com/anzhiyu-c/hexo-theme-anzhiyu
+         text: 主题
+       - link: https://imghubc.pages.dev/
+         text: 图床
       # - link: https://beian.miit.gov.cn/
       #   text: 湘ICP备-xxxxxxx号
     subTitle:
