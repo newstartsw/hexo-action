@@ -1,0 +1,10 @@
+#web_bg {
+    background-size: 20rem;
+    background-image: url(https://imghubc.pages.dev/file/tg/XFPn1x96.svg)!important;
+    background-repeat: initial
+}
+
+[data-theme=dark] #web_bg {
+    background-size: 100rem;
+    background-image: url(https://imghubc.pages.dev/file/tg/V3Eo65Bg.jpg)!important
+}
