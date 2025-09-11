@@ -815,8 +815,12 @@ aside:
     name_link: /
 
   card_announcement:
-    enable: false
-    content: 欢迎来看我的博客鸭~
+    enable: true
+    content: <span>👋🏻 Hi，我是 nssw，欢迎你！</span><br>
+             <span>❓ 如有问题欢迎评论区交流！</span><br>
+             <span>😫 页面异常？尝试<kbd>Ctrl</kbd>+<kbd>F5</kbd></span><br>
+             <span>📧 如需联系我：<a href="mailto:newstartsw@outlook.com"><b>发送邮件🚀</b></a></span>
+             <div id="welcome-info"></div> # 必须项
   card_weixin:
     enable: false
     face: https://bu.dusays.com/2023/01/13/63c02edf44033.png
@@ -1249,7 +1253,8 @@ inject:
     # 自定义js
     # - <script src="/js/xxx"></script>
     - <script defer src="https://ui.njuv.pp.ua/script.js" data-website-id="2dedc69b-643f-4adb-b893-7d4936e9f568"></script>
-
+    - <script src="/js/card-welcome.js"></script>
+    
 # CDN
 # Don't modify the following settings unless you know how they work
 # 非必要请不要修改
