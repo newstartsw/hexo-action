@@ -821,6 +821,7 @@ aside:
              <span>😫 页面异常？尝试<kbd>Ctrl</kbd>+<kbd>F5</kbd></span><br>
              <span>📧 如需联系我：<a href="mailto:newstartsw@outlook.com"><b>发送邮件🚀</b></a></span>
              <div id="welcome-info"></div> # 必须项
+             <a title="无聊湾 🥱 The Boring Bay" href="https://boringbay.com"><img height="18px" src="https://boringbay.com/api/badge/nssw.200536.xyz"></img></a>
   card_weixin:
     enable: false
     face: https://bu.dusays.com/2023/01/13/63c02edf44033.png
