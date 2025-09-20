@@ -1252,7 +1252,6 @@ inject:
   bottom:
     # 自定义js
     # - <script src="/js/xxx"></script>
-    - <script defer src="https://ui.njuv.pp.ua/script.js" data-website-id="2dedc69b-643f-4adb-b893-7d4936e9f568"></script>
     - <script src="/js/card-welcome.js"></script>
     
 # CDN
